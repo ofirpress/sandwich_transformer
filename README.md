@@ -13,7 +13,7 @@ The code here simply adds a way to reorder the sublayers of the Adaptive Span mo
 You need CUDA 10 and PyTorch 1.2.0 to run this code. See [this page](https://pytorch.org/get-started/previous-versions/https://pytorch.org/get-started/previous-versions/) for installation instructions. To replicate our experimental conditions eight V100 GPUs are needed. 
 
 ## Running experiments in the paper
-The scripts for training the character-level models from the paper are located in `./experiments/` directory. For example, to train the enwik8 model, run:
+The scripts for training the character-level models from the paper are located in the `./experiments/` directory. For example, to train the enwik8 model, run:
 ```bash
 bash experiments/enwik8_large.sh
 ```
