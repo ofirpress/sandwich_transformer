@@ -198,10 +198,11 @@ class Logger:
             avg_spans = []
             max_spans = []
             for layer in model.module.layers:
-                avg_spans.append(
-                    layer.attn.attn.adaptive_span.get_current_avg_span())
-                max_spans.append(
-                    layer.attn.attn.adaptive_span.get_current_max_span())
+                if layer.use_attn:
+                    avg_spans.append(
+                        layer.attn.attn.adaptive_span.get_current_avg_span())
+                    max_spans.append(
+                        layer.attn.attn.adaptive_span.get_current_max_span())
             span_avg = float(sum(avg_spans)) / len(avg_spans)
             span_max = float(max(max_spans))
             self._log('span_avg', span_avg)

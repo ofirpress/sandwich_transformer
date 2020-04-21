@@ -153,27 +153,32 @@ class FeedForwardLayer(nn.Module):
 
 
 class TransformerSeqLayer(nn.Module):
-    def __init__(self, hidden_size, **kargs):
+    def __init__(self, hidden_size,s,f, **kargs):
         nn.Module.__init__(self)
-        self.attn = MultiHeadSeqAttention(hidden_size=hidden_size, **kargs)
-        self.ff = FeedForwardLayer(hidden_size=hidden_size, **kargs)
+        self.attn = MultiHeadSeqAttention(hidden_size=hidden_size, **kargs) if s is 's' else None
+        self.ff = FeedForwardLayer(hidden_size=hidden_size, **kargs) if f is 'f' else None
         self.norm1 = nn.LayerNorm(hidden_size)
         self.norm2 = nn.LayerNorm(hidden_size)
+
+        self.use_attn = s == 's'
+        self.use_ff = f == 'f'
 
     def forward(self, h, h_cache, key_pe):
         # h = B x M x H
         # h_cache = B x L x H
-        h_all = torch.cat([h_cache, h], dim=1)  # B x (M+L) x H
-        attn_out = self.attn(h, h_all, h_all, key_pe)
-        h = self.norm1(h + attn_out)  # B x M x H
-        ff_out = self.ff(h)
-        out = self.norm2(h + ff_out)  # B x M x H
-        return out
+        if self.use_attn: 
+            h_all = torch.cat([h_cache, h], dim=1)  # B x (M+L) x H
+            attn_out = self.attn(h, h_all, h_all, key_pe)
+            h = self.norm1(h + attn_out)  # B x M x H
+        if self.use_ff:   
+            ff_out = self.ff(h)
+            h = self.norm2(h + ff_out)  # B x M x H
+        return h
 
 
 class TransformerSeq(nn.Module):
     def __init__(self, vocab_size, hidden_size, nb_heads, nb_layers,
-                 attn_span, **kargs):
+                 attn_span, architecture, **kargs):
         nn.Module.__init__(self)
         # token embeddings
         self.in_emb = nn.Embedding(vocab_size, hidden_size)
@@ -182,12 +187,15 @@ class TransformerSeq(nn.Module):
         self.key_pe = nn.Parameter(
             torch.randn(1, hidden_size // nb_heads, attn_span))
 
+        arch = architecture
+        print(arch)
+        self.attn_layer_count = arch.count('s')
         self.layers = nn.ModuleList()
         self.layers.extend(
             TransformerSeqLayer(
-                hidden_size=hidden_size, nb_heads=nb_heads,
-                attn_span=attn_span, **kargs)
-            for _ in range(nb_layers))
+                hidden_size=hidden_size, s= arch[2*i], f=arch[2*i+1], nb_heads=nb_heads,
+                attn_span=attn_span,  **kargs)
+            for i in range(nb_layers))
 
     def forward(self, x, h_cache):
         # x size = B x M
@@ -195,15 +203,18 @@ class TransformerSeq(nn.Module):
         h = self.in_emb(x)  # B x M x H
         h_cache_next = []
         for l, layer in enumerate(self.layers):
-            cache_size = layer.attn.attn.get_cache_size()
-            if cache_size > block_size:
-                h_cache_next_l = torch.cat(
-                    [h_cache[l][:, -cache_size + block_size:, :], h],
-                    dim=1).detach()
+            if layer.use_attn:
+                cache_size = layer.attn.attn.get_cache_size()
+                if cache_size > block_size:
+                    h_cache_next_l = torch.cat(
+                        [h_cache[l][:, -cache_size + block_size:, :], h],
+                        dim=1).detach()
+                else:
+                    h_cache_next_l = h[:, -cache_size:, :].detach()
+                h_cache_next.append(h_cache_next_l)
+                h = layer(h, h_cache[l], self.key_pe)  # B x M x H
             else:
-                h_cache_next_l = h[:, -cache_size:, :].detach()
-            h_cache_next.append(h_cache_next_l)
-            h = layer(h, h_cache[l], self.key_pe)  # B x M x H
+                h = layer(h, [], self.key_pe)
 
         out = F.log_softmax(self.out_emb(h), dim=-1)
 

@@ -1,43 +1,39 @@
-# Adaptive Attention Span for Transformers
 
-This is a code for running experiments in [Adaptive Attention Span for Transformers](https://arxiv.org/abs/1905.07799) paper. It trains a Transformer model on character-level language modeling tasks. The adaptive span allows a model to learn an optimal context size for each self-attention head from training data. As shown in the below figure, only few heads require long attention span, thus making it possible to increase the context size to 8k tokens without increasing computation time and memory footprint significantly.
+## Improving Transformer Models by Reordering their Sublayers
 
-<div align="center">
-  <img src="README_files/span.png" width="400px" />
-</div>
+This repository contains the code for running the character-level **Sandwich Transformers** from our ACL 2020 paper on [Improving Transformer Models by Reordering their Sublayers](https://ofir.io/sandwich_transformer.pdf). 
+
+Our character-level model (and this repo) is based on the  [Adaptive Attention Span for Transformers](https://arxiv.org/abs/1905.07799) model. In our paper we showed that by simply reordering that model's self-attention and feedforward sublayers, we could improve performance on the enwik8 benchmark (where we achieve 0.968 BPC on the test set). 
+
+The code here simply adds a way to reorder the sublayers of the Adaptive Span model, using the `--architecture` parameter. 
+
+
 
 ## Requirements
-You need PyTorch 0.4.1 or above and a cuda-enabled GPU to run the code.
+You need CUDA 10 and PyTorch 1.2.0 to run this code. See [this page](https://pytorch.org/get-started/previous-versions/https://pytorch.org/get-started/previous-versions/) for installation instructions. To replicate our experimental conditions eight V100 GPUs are needed. 
 
 ## Running experiments in the paper
-Scripts for running experiments in the paper are located in `./experiments/` directory. For example, a smaller 8-layer version of our model can be trained on a single GPU by running:
+The scripts for training the character-level models from the paper are located in `./experiments/` directory. For example, to train the enwik8 model, run:
 ```bash
-bash experiments/enwiki8_small.sh
+bash experiments/enwik8_large.sh
 ```
-It should reach about 1.3bpc on dev after 150k steps.
 
-For training larger models, multiple GPUs are recommended. In the script files, you can configure the number of available GPUs. Increase the `--batch-split` argument if you run out of GPU memory (it splits batches into smaller pieces without changing the final result).
+We used eight V100 GPUs, but if you'd like to run this model on GPUs with less memory you can increase the `--batch-split`  (it splits batches into smaller pieces without changing the final result).
 
 We  obtained the following results in our experiments:
 
-| Experiment | #params | dev (bpc) | test (bpc) |
-| ---------- | ---:| ---:| ----:|
-| enwik8 | 38M | 1.04 | 1.02 |
-| enwik8_large | 209M | 1.00 | 0.98 |
-| text8 | 39M | 1.05 | 1.11 |
-| text8_large | 209M | 1.01 | 1.07 |
+| Experiment | #params |  test (bpc) |
+| ---------- | ---:| ----:|
+| **enwik8 Sandwich Transformer**| 209M |  0.968 |
+| **text8 Sandwich Transformer** | 209M | 1.076 |
 
-## Pre-trained models
-You can download pre-trained models by running the `get_pretrained.sh` script. Then the same scripts in `./experiments/` can be used to evaluate those models. Since the download script puts models in `./checkpoints/`, make sure there is no file with the same name. Note that these pre-trained models are obtained by rerunning the training scripts after the code cleanup, so there are small differences from the above results due to the randomness of the training.
 
-## More about the code
-- **Multi GPUs and nodes:** By default, the code uses `nn.DataParallel` to utilize all available GPUs. For more efficiency, enable distributed training by `--distributed` argument, which can run on multiple nodes.
-- **Base model:** As a base model, the code implements a Transformer model with relative position embeddings and hidden state caching for processing a sequence of tokens.
-- **Adaptive attention span:** An argument `--adapt-span` enables adaptive span. Otherwise a model will have a fixed attention span. The adaptive-span is implemented as a `nn.Module` to make it easier to plug it into other models.
-- **Training time:** A large model training takes about 1.2sec/batch near the end (initially it's faster because the attention spans are smaller) on 8 V100 GPUs. So, for example, the whole `enwik8_large` training of 170k steps should take less than 2.4 days.
+### The `--architecture` parameter
+A standard transformer with 3 layers (so 6 self-attention and feedforward sublayers) would use be trained using  `--architecture sfsfsf`. That 6 sublayer model with a sandwiching coefficient of 1 would be  `--architecture s.sfsf.f` and with a sandwiching coefficient of 2 would be  `--architecture s.s.sf.f.f`. Make sure to also set the `--nlayers` parameter to be the length of the `architecture` string divided by 2. 
+
 
 ## License
 The code is licensed under CC-BY-NC license. See the LICENSE file for more details.
 
-## Acknowledgement
-We thank Xavier Martinet for helping with cleaning the code. The data preprocessing scripts are downloaded from [awd-lstm](https://github.com/salesforce/awd-lstm-lm/) and [transformer-XL](https://github.com/kimiyoung/transformer-xl) repos. The `adagrad_with_grad_clip.py` is mostly adapted from PyTorch.
+## Acknowledgements + More Information
+This code is based on the code of the [Adaptive Span]([https://github.com/facebookresearch/adaptive-span](https://github.com/facebookresearch/adaptive-span)) model. We recommend reading the [Adaptive Span README](https://github.com/facebookresearch/adaptive-span/blob/master/README.md) for further information on this codebase. 

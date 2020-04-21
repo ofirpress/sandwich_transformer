@@ -10,7 +10,8 @@ mkdir -p checkpoints
 ngpus=8
 args="
 --data data/enwik8 \
---nlayers 24 \
+--architecture s.s.s.s.s.sfsfsfsfsfsfsfsfsfsfsfsfsfsfsfsfsfsfsf.f.f.f.f.f  \
+--nlayers 29 \
 --hid-sz 768 \
 --inner-hid-sz 4096 \
 --nheads 8 \

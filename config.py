@@ -81,6 +81,12 @@ PARAMS_CONFIG = {
             'help': 'dropout rate of ReLU and attention',
             'dest': 'dropout'
         },
+        '--architecture': {
+            'type': str,
+            'default': None,
+            'help': 'arch',
+            'dest': 'architecture'
+        },
     },
     # optimization-specific
     'optim_params': {

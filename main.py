@@ -58,7 +58,7 @@ def launch(env_params,
         local_rank = env_params['local_rank']
         model = model.to(device)
         model = torch.nn.parallel.DistributedDataParallel(
-            model, device_ids=[local_rank], output_device=local_rank)
+            model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
     else:
         model = torch.nn.DataParallel(model)
         model = model.to(device)
@@ -105,9 +105,9 @@ def launch(env_params,
     hid_cache = [[
         torch.zeros(
             train_data.size(0),
-            layer.attn.attn.get_cache_size(),
-            model_params['hidden_size']).to(device)
-        for layer in model.module.layers] for _ in range(2)]
+            model.module.layers[layer_i].attn.attn.get_cache_size(),
+            model_params['hidden_size']).to(device) 
+        for layer_i in range(model.module.attn_layer_count) ] for _ in range(2)]
 
     nb_batches_per_iter = trainer_params['nb_batches_per_iter']
     for iter_no in range(iter_init, trainer_params['nb_iter']):

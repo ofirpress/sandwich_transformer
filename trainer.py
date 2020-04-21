@@ -25,8 +25,8 @@ def _train_step(model, X, Y, h_cache, eval_only, loss_div=1):
     if not eval_only:
         # loss term from adaptive-span
         if model.module.layers[0].attn.attn.adapt_span_enabled:
-            loss += sum(layer.attn.attn.adaptive_span.get_loss()
-                        for layer in model.module.layers)
+            loss += sum(model.module.layers[layer_i].attn.attn.adaptive_span.get_loss() 
+                        for layer_i in range(model.module.attn_layer_count))
 
         (loss / loss_div).backward()
 
@@ -59,8 +59,7 @@ def _train_batch(model, optimizer, scheduler, X, Y, h_cache,
         h_cache = [
             torch.cat(
                 [h_cache_list[i][l] for i in range(batch_split)]
-            , dim=0) for l in range(len(h_cache))]
-
+              , dim=0) for l in range(len(h_cache))]
     if not eval_only:
         if scheduler is not None:
             scheduler.step()
@@ -69,7 +68,8 @@ def _train_batch(model, optimizer, scheduler, X, Y, h_cache,
         # make sure span parameters are in a correct range
         if model.module.layers[0].attn.attn.adapt_span_enabled:
             for layer in model.module.layers:
-                layer.attn.attn.adaptive_span.clamp_param()
+                if layer.use_attn:
+                    layer.attn.attn.adaptive_span.clamp_param()
 
     return loss_value, h_cache
 
@@ -125,9 +125,9 @@ def full_eval(model, optimizer, scheduler, data, block_size, hidden_size):
     h_cache = [
         torch.zeros(
             data.size(0),
-            layer.attn.attn.get_cache_size(),
-            hidden_size).to(data.device)
-        for layer in model.module.layers]
+            model.module.layers[layer_i].attn.attn.get_cache_size(),
+            hidden_size).to(data.device) 
+        for layer_i in range(model.module.attn_layer_count)]
 
     loss_all = 0
     actual_nb_batches_per_iter = 0
