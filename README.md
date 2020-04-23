@@ -22,10 +22,10 @@ We used eight V100 GPUs, but if you'd like to run this model on GPUs with less m
 
 We  obtained the following results in our experiments:
 
-| Experiment | #params |  test (bpc) |
-| ---------- | ---:| ----:|
-| **enwik8 Sandwich Transformer**| 209M |  0.968 |
-| **text8 Sandwich Transformer** | 209M | 1.076 |
+| Experiment | #params | valid (bpc) | test (bpc) |
+| ---------- | ---:|            ----:|       ----:|
+| **enwik8 Sandwich Transformer**| 209M |  0.992 | 0.968 |
+| **text8 Sandwich Transformer** | 209M |  1.012 | 1.076 |
 
 
 ### The `--architecture` parameter
