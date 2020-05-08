@@ -1,7 +1,7 @@
 
 ## Improving Transformer Models by Reordering their Sublayers
 
-This repository contains the code for running the character-level **Sandwich Transformers** from our ACL 2020 paper on [Improving Transformer Models by Reordering their Sublayers](https://ofir.io/sandwich_transformer.pdf) (video presentation [here](https://www.youtube.com/watch?v=rFuuGEj3AhU)). 
+This repository contains the code for running the character-level **Sandwich Transformers** from our ACL 2020 paper on [Improving Transformer Models by Reordering their Sublayers](https://ofir.io/sandwich_transformer.pdf) (video presentation [here](https://www.youtube.com/watch?v=rFuuGEj3AhU), summary [here](https://ofir.io/Improving-Transformer-Models-by-Reordering-their-Sublayers/)). 
 
 Our character-level model (and this repo) is based on the  [Adaptive Attention Span for Transformers](https://arxiv.org/abs/1905.07799) model. In our paper we showed that by simply reordering that model's self-attention and feedforward sublayers, we could improve performance on the enwik8 benchmark (where we achieve 0.968 BPC on the test set). 
 
