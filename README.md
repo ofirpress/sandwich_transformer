@@ -1,11 +1,29 @@
 
 ## Improving Transformer Models by Reordering their Sublayers
 
-This repository contains the code for running the character-level **Sandwich Transformers** from our ACL 2020 paper on [Improving Transformer Models by Reordering their Sublayers](https://ofir.io/sandwich_transformer.pdf) (video presentation [here](https://www.youtube.com/watch?v=rFuuGEj3AhU), summary [here](https://ofir.io/Improving-Transformer-Models-by-Reordering-their-Sublayers/)). 
+This repository contains the code for running the character-level **Sandwich Transformers** from our ACL 2020 paper on [Improving Transformer Models by Reordering their Sublayers](https://www.aclweb.org/anthology/2020.acl-main.270.pdf) (video presentation [here](https://www.youtube.com/watch?v=rFuuGEj3AhU), summary [here](https://ofir.io/Improving-Transformer-Models-by-Reordering-their-Sublayers/)). 
 
 Our character-level model (and this repo) is based on the  [Adaptive Attention Span for Transformers](https://arxiv.org/abs/1905.07799) model. In our paper we showed that by simply reordering that model's self-attention and feedforward sublayers, we could improve performance on the enwik8 benchmark (where we achieve 0.968 BPC on the test set). 
 
 The code here simply adds a way to reorder the sublayers of the Adaptive Span model, using the `--architecture` parameter. 
+
+If you use this code or results from our paper, please cite:
+```
+@inproceedings{press-etal-2020-improving,
+    title = "Improving Transformer Models by Reordering their Sublayers",
+    author = "Press, Ofir  and
+      Smith, Noah A.  and
+      Levy, Omer",
+    booktitle = "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
+    month = jul,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://www.aclweb.org/anthology/2020.acl-main.270",
+    doi = "10.18653/v1/2020.acl-main.270",
+    pages = "2996--3005",
+}
+```
 
 
 
