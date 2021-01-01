@@ -11,9 +11,7 @@ If you use this code or results from our paper, please cite:
 ```
 @inproceedings{press-etal-2020-improving,
     title = "Improving Transformer Models by Reordering their Sublayers",
-    author = "Press, Ofir  and
-      Smith, Noah A.  and
-      Levy, Omer",
+    author = "Press, Ofir and Smith, Noah A. and Levy, Omer",
     booktitle = "Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics",
     month = jul,
     year = "2020",
